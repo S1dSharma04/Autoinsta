@@ -1,22 +1,23 @@
 """
 src/app/main.py
-
-Application factory. `create_app()` builds and returns a fully configured
-FastAPI instance. Nothing at module level talks to a database, reads a
-file, or does I/O — that all happens inside functions, called on purpose,
-at a time we control (app startup, or a test fixture).
 """
 from fastapi import FastAPI
 
 from app.api import auth_routes, executions, workflows
+from app.error_handlers import register_error_handlers
+from app.logging_config import configure_logging
 
 
 def create_app() -> FastAPI:
+    configure_logging()
+
     app = FastAPI(
         title="Autoinsta",
         description="Instagram workflow automation backend",
         version="0.1.0",
     )
+
+    register_error_handlers(app)
 
     app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
     app.include_router(workflows.router, prefix="/api/workflows", tags=["workflows"])
@@ -29,7 +30,4 @@ def create_app() -> FastAPI:
     return app
 
 
-# The ASGI server (uvicorn) needs a module-level object to point at.
-# This is the ONE place a factory result gets called eagerly — and it's
-# fine here, because this module's only job is "be the thing uvicorn imports."
 app = create_app()
