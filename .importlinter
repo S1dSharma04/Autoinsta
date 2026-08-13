@@ -1,0 +1,51 @@
+[importlinter]
+root_package = app
+include_external_packages = True
+
+[importlinter:contract:1]
+name = Domain has no outward dependencies
+type = forbidden
+source_modules =
+    app.domain
+forbidden_modules =
+    app.application
+    app.infrastructure
+    app.api
+    app.workers
+    fastapi
+    sqlalchemy
+    aio_pika
+    celery
+    redis
+    httpx
+
+[importlinter:contract:2]
+name = Application does not import infrastructure directly
+type = forbidden
+source_modules =
+    app.application
+forbidden_modules =
+    app.infrastructure
+    app.api
+    app.workers
+
+[importlinter:contract:3]
+name = Engine stays pure
+type = forbidden
+source_modules =
+    app.engine
+forbidden_modules =
+    app.infrastructure
+    app.api
+    fastapi
+    sqlalchemy
+    aio_pika
+
+[importlinter:contract:4]
+name = Layers form a strict hierarchy
+type = layers
+layers =
+    app.api : app.workers
+    app.application
+    app.infrastructure
+    app.domain
