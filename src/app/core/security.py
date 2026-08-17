@@ -40,3 +40,27 @@ def decode_access_token(token: str) -> UUID:
     settings = get_settings()
     payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
     return UUID(payload["sub"])
+
+
+
+
+from cryptography.fernet import Fernet, InvalidToken
+
+
+def get_fernet() -> Fernet:
+    settings = get_settings()
+    return Fernet(settings.fernet_key.encode())
+
+
+def encrypt_secret(plaintext: str) -> bytes:
+    return get_fernet().encrypt(plaintext.encode())
+
+
+def decrypt_secret(ciphertext: bytes) -> str:
+    """
+    Raises cryptography.fernet.InvalidToken if the ciphertext is corrupt,
+    tampered with, or was encrypted with a different key. Callers must
+    handle this - it means the credential is unreadable, not that it's
+    merely wrong.
+    """
+    return get_fernet().decrypt(ciphertext).decode()
